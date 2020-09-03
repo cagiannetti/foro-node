@@ -85,8 +85,6 @@ var controller = {
                     });
                 }
             });
-
-
             
         }else{
            //Devolver respuesta de error
@@ -159,8 +157,13 @@ var controller = {
             });
 
         });
+    },
 
+    update: function (req, res){
 
+        return res.status(200).send({
+            message: 'Método de actualización de datos de usuarios'
+        });
 
     }
 
