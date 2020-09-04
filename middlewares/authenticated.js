@@ -11,7 +11,7 @@ var secret = 'clave-secreta-para-generar-el-token-9999';
 
 exports.authenticated = function(req, res, next){
     
-    console.log('estás pasando por el middleware!!');    
+    //console.log('estás pasando por el middleware!!');    
     
     //Comprobar si llega authorization en la cabecera
     

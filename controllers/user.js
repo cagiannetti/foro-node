@@ -161,12 +161,77 @@ var controller = {
 
     update: function (req, res){
 
-        return res.status(200).send({
-            message: 'Método de actualización de datos de usuarios'
-        });
+        //Recoger datos del usuario
+        var params = req.body;
+            //console.log(params);
+
+        //Validar los datos (con la dependencia validator, dará true / false cuando se cumplan ó no)
+        try{
+            var validate_name = !validator.isEmpty(params.name);
+            var validate_surname = !validator.isEmpty(params.surname);
+            var validate_email = !validator.isEmpty(params.email) &&  validator.isEmail(params.email);
+            //console.log(validate_name, validate_surname, validate_email);
+        }catch(err){
+            return res.status(400).send({
+                status: 'error',
+                message: 'Error en los datos recibidos'
+            });
+        }
+        
+        //Eliminar propiedades que no vamos a actualizar
+        delete params.password;
+        
+        var userId = req.user.sub;
+        //console.log(req.user);
+
+        //Comprobar si el email es único
+        if(req.user.email != params.email){
+            User.findOne({email: params.email.toLowerCase()}, (err, user)=>{ //busca si el email ya existe
+            
+                if(err){
+                    return res.status(500).send({
+                        message: 'Error al intentar identificarse'
+                    });
+                };
+    
+                if(user && user.email == params.email){ //para evitar que se dupliquen mails
+                    return res.status(200).send({
+                        message: 'El mail no puede ser modificado, ya existe'
+                    });
+                }else{
+                    return res.status(200).send({
+                        message: 'Acá iría la lógica para actualizar con el nuevo mail aceptado'
+                    });
+                };
+            });
+        }else{
+            //Buscar y actualizar documento
+            User.findByIdAndUpdate({_id: userId}, params, {new: true}, (err, userUpdated)=>{ //(condicion, datos a actualizar, opciones, callbak)
+                if(err){
+                    return res.status(500).send({
+                        status: 'error',
+                        message: 'Error al actualizar el usuario'
+                    });
+                }
+
+                if(!userUpdated){
+                    return res.status(500).send({
+                        status: 'error',
+                        message: 'No se pudo actualizar el usuario'
+                    });
+                }
+
+                //Devolver respuesta de exito
+                return res.status(200).send({
+                    status: 'success',
+                    message: 'Se actualizó el usuario',
+                    user: userUpdated
+                });
+            }); 
+        }
+
 
     }
-
 };
 
 

@@ -4,9 +4,11 @@ var mongoose = require('mongoose'); //mongoose es una librería que me va a perm
 var app = require('./app.js'); //importamos el modulo app
 var port = process.env.PORT || 3999; //toma el puerto del entorno ó sino lo setea en 3999
 
+mongoose.set('useFindAndModify', false);
 mongoose.Promise = global.Promise;
 
-mongoose.connect('mongodb://localhost:27017/api_rest_node', { useNewUrlParser:true })
+mongoose.connect('mongodb://localhost:27017/api_rest_node', { useNewUrlParser:true, useUnifiedTopology: true })
+                                                            
         .then(()=>{
             console.log('La conexión a la BD de mongo se ha realizado correctamente!!!');
 
