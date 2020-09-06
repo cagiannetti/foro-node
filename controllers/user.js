@@ -2,6 +2,8 @@
 
 var validator =  require ('validator'); //creo un objeto validator, cargo la librería validator con varios métodos de validación
 var bcrypt = require('bcrypt-nodejs'); //cargamos la librería bcrypt para cifrar la password
+var fs = require('fs'); //librería de nodejs que permite trabajar con el sistema de archivos
+var path = require ('path'); //librería de nodejs
 var User = require('../models/user'); //requiero el modelo de usuario para poder crear nuevos usuarios
 var jwt = require('../services/jwt'); //requiero el servicio que creamos para generar token
 
@@ -228,11 +230,83 @@ var controller = {
                     user: userUpdated
                 });
             }); 
+        };
+    },
+
+    uploadAvatar: function(req, res){
+        //configurar módulo multiparty (middleware) para habilitar la subida de archivos, routes/user.js
+
+        //Recoger el archivo de la petición
+        var file_name = 'Avatar no subido...';
+        
+        //console.log(req.files); //la propiedad files contiene la imagene enviada
+
+        //if(!req.files.file0){
+        if(isEmpty(req.files)){
+            return res.status(404).send({
+               status: 'error',
+               message: file_name
+            });
+        }
+        
+        //Conseguir el nombre/extensión del archivo subido
+        var file_path = req.files.file0.path;
+        var file_split = file_path.split('\\'); //segmentamos el path para poder aislar el nombre de la imagen. Advertencia: en linux ó mac debería ser var file_split = file_path.split('/');
+        var file_name = file_split[2]; //obtenemos el nombre del archivo
+
+        var ext_split = file_name.split('\.'); 
+        var file_ext = ext_split[1]; //conseguir la extensión
+
+        //Comprobar extensión (solo imagen), si no es válida borrar el archivo subido, utilizamos la librería fs
+        if(file_ext != 'png' && file_ext != 'jpg' && file_ext != 'jpeg' && file_ext != 'gif'){
+            fs.unlink(file_path, (err)=>{
+                return res.status(200).send({
+                    status: 'error',
+                    message: 'La extensión del archivo no es válida',
+                    se_borra: file_path
+                });
+            });
+        }else{
+            //Sacar el id del usuario identificado
+            var userId = req.user.sub;
+            
+            //Buscar y actualizar documento en BD
+            User.findOneAndUpdate({_id: userId}, {image: file_name}, {new: true}, (err, userUpdated) => {
+            
+                if(err || !userUpdated){
+                    return res.status(500).send({
+                        status: 'error',
+                        message: 'error al guardar la imagen del usuario'
+                    });
+                }
+
+                //Devolver respuesta
+                return res.status(200).send({
+                    status: 'success',
+                    message: 'Upload AVATAR',
+                    file_path,
+                    file_split,
+                    file_name,
+                    file_ext,
+                    user: userUpdated
+                });
+            });
+
         }
 
 
-    }
+    },
+
 };
 
+
+//función local para comprobar si un objeto viene vacío, lo hice porque no funcionaba el método de Víctor Robles
+function isEmpty(obj) {
+    for(var key in obj) {
+        if(obj.hasOwnProperty(key))
+            return false;
+    }
+    return true;
+}
 
 module.exports = controller;
