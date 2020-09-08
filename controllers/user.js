@@ -6,6 +6,7 @@ var fs = require('fs'); //librería de nodejs que permite trabajar con el sistem
 var path = require ('path'); //librería de nodejs
 var User = require('../models/user'); //requiero el modelo de usuario para poder crear nuevos usuarios
 var jwt = require('../services/jwt'); //requiero el servicio que creamos para generar token
+const { exists } = require('../models/user');
 
 var controller = {
     
@@ -296,6 +297,53 @@ var controller = {
 
 
     },
+
+    avatar: function(req, res){ //función reemplazada a la de victor robles
+        var fileName = req.params.fileName;
+        var pathFile = './uploads/users/'+fileName;
+        fs.access(pathFile, fs.constants.W_OK, (err) => {
+            if(!err){
+            return res.sendFile(path.resolve(pathFile));
+            }else{
+            return res.status(404).send({
+                message: 'La imagen no existe'
+            });
+            }
+        });
+    },
+
+    getUsers: function(req, res){
+        User.find().exec((err, users)=>{ //metodo de mongoose
+            if(err || !users){
+                return res.status(404).send({
+                    status : 'error',
+                    message: 'no hay usuarios que mostrar'
+                });
+            }
+
+            return res.status(200).send({
+                status: 'success',
+                users
+            });
+        });
+    },
+
+    getUser: function(req, res){
+        var userId = req.params.userId;
+        User.findById(userId).exec((err, user)=>{
+            if(err || !user){
+                return res.status(404).send({
+                    status : 'error',
+                    message: 'no existe el usuario'
+                });
+            }
+
+            return res.status(200).send({
+                status: 'success',
+                user
+            });
+        });
+    }
 
 };
 
