@@ -10,6 +10,7 @@ var app = express();
 
 //Cargar archivos de rutas
 var user_routes =  require('./routes/user');
+var topic_routes = require('./routes/topic');
 
 //Middlewares
 app.use(bodyParser.urlencoded({extended: false})); //config basica 
@@ -19,6 +20,7 @@ app.use(bodyParser.json()); //convierte una petición en un objeto json para pod
 
 //Reescribir rutas
 app.use('/api', user_routes); //añadimos /api a todas las rutas de usuario, me va a quedar por ejemplo http://localhost:3999/api/probando
+app.use('/api', topic_routes);
 
 //Rutas de prueba
     app.get('/prueba', (req, res)=>{
