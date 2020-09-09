@@ -39,6 +39,7 @@ var controller = {
             topic.content = params.content;
             topic.code = params.code;
             topic.lang = params.lang;
+            topic.user = req.user.sub;
             
             //Guardar el topic
             topic.save((err, topicStored) => {
@@ -64,7 +65,61 @@ var controller = {
             return res.status(200).send({
                 message: 'Los datos no son válidos'
             });
-        }
+        };
+    },
+
+    getTopics: function(req,res){
+
+        //Cargar la librería de paginación en el modelo de topics
+
+        //Recoger la página actual
+        if( !req.params.page || req.params.page=="0" || req.params.page==0 || req.params.page == null || req.params.page == undefined){
+            var page=1;
+        }else{
+            var page = parseInt(req.params.page); //convertimos a número la cadena que indica la página y la asignamos
+        }; 
+        
+
+        /* Indicar opciones de paginación pag actual
+        - sort: campo de orden 1 ó -1 ascendente ó descendente
+        - populate: sirve para ir a buscar los datos del usuario a la otra colección a través del id que está almacenado, tal como si fuera una relación
+        - limit: cantidad de topics por página 
+        - page: página actual*/
+        var options = {
+            sort: {date: -1},
+            populate: 'user',
+            limit: 5,
+            page: page
+        };
+
+
+        //Find paginado
+        Topic.paginate({}, options, (err, topics) => {
+            
+            if(err){
+                return res.status(500).send({
+                    status: 'error',
+                    message: 'Error al hacer la consulta'
+                });
+            };
+
+            if(!topics){
+                return res.status(404).send({
+                    status: 'error',
+                    message: 'No hay topics'
+                });
+            }
+            
+            //Devolver resultado (topics, total de topics, total de páginas)
+            return res.status(200).send({
+                status: 'success',
+                topics: topics.docs,
+                totalDocs: topics.totalDocs,
+                totalPages: topics.totalPages,
+                page
+            });    
+        });
+
 
 
     }

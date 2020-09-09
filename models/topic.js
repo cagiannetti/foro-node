@@ -1,6 +1,7 @@
 'use strict'
 
 var mongoose = require('mongoose');
+var mongoosePaginate = require('mongoose-paginate-v2'); //módulo de paginación
 var Schema = mongoose.Schema;
 
 //Modelo de COMMENTS
@@ -23,5 +24,9 @@ var TopicSchema = Schema({
     user: { type: Schema.ObjectId, ref: 'User'},
     comments: [CommentSchema]
 });
+
+//Añadirle un pluggin de paginación al modelo, para devolver resultados paginado
+TopicSchema.plugin(mongoosePaginate);
+
 
 module.exports = mongoose.model('Topic', TopicSchema);
