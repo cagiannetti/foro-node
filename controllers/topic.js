@@ -186,9 +186,104 @@ var controller = {
                     topic
                 });
 
-             });
+        });
+    },
 
+    update: function(req, res){
+        
+        //Recoger la id del topic desde la url
+        var topicId = req.params.id;    
 
+        //Recoger los datos que llegan desde post
+        var params = req.body;
+        
+        //Validar datos
+        try{
+           var validate_title = !validator.isEmpty(params.title);
+           var validate_content = !validator.isEmpty(params.content);
+           var validate_lang = !validator.isEmpty(params.lang);
+
+        }catch(err){
+            return res.status(200).send({
+                status:'error',
+                message: 'Faltan datos por enviar'
+            });
+        };
+
+        if(validate_title && validate_content && validate_lang){
+            //Montar un JSON con los datos que quiero modificar
+            var update = {
+                title: params.title,
+                content: params.content,
+                code: params.code,
+                lang: params.lang
+            };
+
+            //Find and update por id y por id de usuario (solo el dueño puede modificar) 
+            Topic.findOneAndUpdate({ _id: topicId, user: req.user.sub }, update, {new: true}, (err, topicUpdated) => {
+                
+                if(err){
+                    return res.status(500).send({
+                        status: 'error',
+                        message: 'Error en la petición'
+                    });
+                };
+
+                if(!topicUpdated){
+                    return res.status(404).send({
+                        status: 'error',
+                        message: 'No se ha actualizado el tema'
+                    });
+                };
+
+                //Devolver respuesta de éxito
+                return res.status(200).send({
+                    status: 'success',
+                    message: 'Se ha actualizado el topic',
+                    topic: topicUpdated
+                });
+            });
+
+        }else{
+            return res.status(200).send({
+                status:'error',
+                message: 'La validación no ha sido correcta'            
+            });
+        };
+    },
+
+    delete: function(req, res){
+
+        //Recoger la id del topic desde la url
+        var topicId = req.params.id;
+        
+        //Recoger datos del usuario que hizo la request
+        var user = req.user;
+
+        //Find and delete por topicID y por user
+        Topic.findOneAndDelete({_id: topicId, user: req.user.sub}, (err, topicRemoved)=>{
+            
+            if(err){
+                return res.status(500).send({
+                    status: 'error',
+                    message: 'Error en la petición'
+                });
+            };
+
+            if(!topicRemoved){
+                return res.status(404).send({
+                    status: 'error',
+                    message: 'No se ha borrado el tema'
+                });
+            };
+            //Devolver respuesta de éxito
+            return res.status(200).send({
+                status:'success',
+                message: 'Topic borrado',
+                topic: topicRemoved
+            });
+        });
+        
 
 
     }

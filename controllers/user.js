@@ -202,9 +202,29 @@ var controller = {
                         message: 'El mail no puede ser modificado, ya existe'
                     });
                 }else{
-                    return res.status(200).send({
-                        message: 'Acá iría la lógica para actualizar con el nuevo mail aceptado'
-                    });
+                    //Buscar y actualizar documento
+                    User.findByIdAndUpdate({_id: userId}, params, {new: true}, (err, userUpdated)=>{ //(condicion, datos a actualizar, opciones, callbak)
+                        if(err){
+                            return res.status(500).send({
+                                status: 'error',
+                                message: 'Error al actualizar el usuario'
+                            });
+                        }
+
+                        if(!userUpdated){
+                            return res.status(500).send({
+                                status: 'error',
+                                message: 'No se pudo actualizar el usuario'
+                            });
+                        }
+
+                        //Devolver respuesta de exito
+                        return res.status(200).send({
+                            status: 'success',
+                            message: 'Se actualizó el usuario',
+                            user: userUpdated
+                        });
+                    }); 
                 };
             });
         }else{
