@@ -119,6 +119,75 @@ var controller = {
                 page
             });    
         });
+    },
+
+    getTopicsByUser: function(req, res){
+        
+        //Conseguir el id del usuario
+        var userId = req.params.user;
+        
+        //Find con la condición de usuario
+        Topic.find({
+            user: userId
+        })
+        .sort([['date', 'descending']])
+        .exec((err, topics) => {
+            if(err){
+                return res.status(500).send({
+                    status: 'error',
+                    message: 'Error en la petición'
+                });
+            };
+
+            if(!topics){
+                return res.status(404).send({
+                    status: 'error',
+                    message: 'No hay temas para mostrar'
+                });
+            };
+
+            //Devolver respuesta cuando hay exito
+            return res.status(200).send({
+                status: 'success',
+                message: 'get my topics método',
+                topics
+            });
+        });
+    },
+
+    getTopic: function(req, res){
+
+        //Sacar el id del topic de la url
+        var topicId = req.params.id;
+
+        //Hacer find por id del topic
+        Topic.findById(topicId)
+             .populate('user')
+             .exec((err, topic)=>{
+
+                if(err){
+                    return res.status(500).send({
+                        status: 'error',
+                        message: 'Error en la petición'
+                    });
+                };
+
+                if(!topic){
+                    return res.status(404).send({
+                        status: 'error',
+                        message: 'No existe el topic'
+                    });
+                };
+                
+                //Devolver resultado
+                return res.status(200).send({
+                    status: 'success',
+                    message: 'método getTopic OK',
+                    topic
+                });
+
+             });
+
 
 
 

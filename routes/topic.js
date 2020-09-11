@@ -9,5 +9,7 @@ var md_auth = require('../middlewares/authenticated'); //cargo el middleware de 
 router.get('/test', topicController.test);
 router.post('/topic', md_auth.authenticated, topicController.save);
 router.get('/topics/:page?', topicController.getTopics);
+router.get('/user-topics/:user?', topicController.getTopicsByUser);
+router.get('/topic/:id', topicController.getTopic);
 
 module.exports = router;
