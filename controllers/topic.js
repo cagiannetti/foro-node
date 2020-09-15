@@ -19,7 +19,7 @@ var controller = {
 
         //Validar los datos
         try{
-             var validate_title = !validator.isEmpty(params.title);
+            var validate_title = !validator.isEmpty(params.title);
             var validate_content = !validator.isEmpty(params.content);
             var validate_lang = !validator.isEmpty(params.lang);
 
@@ -283,7 +283,45 @@ var controller = {
                 topic: topicRemoved
             });
         });
+    },
+    
+    search: function(req,res){
         
+        // Sacar string a buscar de la url
+        var searchStr = req.params.search;
+
+        // Find or
+        Topic.find({"$or":[
+            {"title": { "$regex": searchStr, "$options": "i"} },
+            {"content": { "$regex": searchStr, "$options": "i"} },
+            {"code": { "$regex": searchStr, "$options": "i"} },
+            {"lang": { "$regex": searchStr, "$options": "i"} }
+        ]})
+        .sort([['date', 'descending']])
+        .exec((err, topics)=>{
+            if(err){
+                return res.status(500).send({
+                    status:'error',
+                    message: 'error en la petición'
+                });
+            }
+
+            if(!topics){
+                return res.status(404).send({
+                    status:'error',
+                    message: 'no hay temas disponibles'
+                });
+            }
+
+            //Devolver respuesta de éxito
+            return res.status(200).send({
+                status:'success',
+                message: 'método search',
+                criteria: req.params.search,
+                topics
+            });
+
+        });
 
 
     }
