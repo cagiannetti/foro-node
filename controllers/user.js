@@ -303,8 +303,6 @@ var controller = {
 
                 //Devolver respuesta
                 return res.status(200).send({
-                    status: 'success',
-                    message: 'Upload AVATAR',
                     file_path,
                     file_split,
                     file_name,
