@@ -64,15 +64,34 @@ var controller = {
                             });
                         }
 
-                        //Devolver respuesta de éxito
-                        return res.status(200).send({
-                            status: 'success',
-                            message: 'método de añadir comentarios',
-                            topic
-                        });
-                    });
-                    
+                        //Hacer find por id del topic para popular usuarios etc
+                        Topic.findById(topic._id)
+                        .populate('user')
+                        .populate('comments.user')
+                        .exec((err, topic)=>{
+                            if(err){
+                                return res.status(500).send({
+                                    status: 'error',
+                                    message: 'Error en la petición'
+                                });
+                            };
 
+                            if(!topic){
+                                return res.status(404).send({
+                                    status: 'error',
+                                    message: 'No existe el topic'
+                                });
+                            };
+                            
+                            //Devolver resultado
+                            return res.status(200).send({
+                                status: 'success',
+                                message: 'método getTopic OK',
+                                topic
+                            });
+                        });
+
+                    });
 
                 }else{
 
@@ -187,13 +206,32 @@ var controller = {
                         });
                     }
 
-                    // Devolver resultado
+                        //Hacer find por id del topic para popular usuarios etc
+                        Topic.findById(topic._id)
+                        .populate('user')
+                        .populate('comments.user')
+                        .exec((err, topic)=>{
+                            if(err){
+                                return res.status(500).send({
+                                    status: 'error',
+                                    message: 'Error en la petición'
+                                });
+                            };
 
-                    return res.status(200).send({
-                        status: 'success',
-                        message: 'comentario borrado',
-                        topic
-                    });
+                            if(!topic){
+                                return res.status(404).send({
+                                    status: 'error',
+                                    message: 'No existe el topic'
+                                });
+                            };
+                            
+                            //Devolver resultado
+                            return res.status(200).send({
+                                status: 'success',
+                                message: 'método getTopic OK',
+                                topic
+                            });
+                        }); 
                 });
 
             }else{
